@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 import kappa.awsclient
 import kappa.event_source.base
-import logging
 
 LOG = logging.getLogger(__name__)
 
@@ -24,33 +25,28 @@ class SNSEventSource(kappa.event_source.base.EventSource):
 
     def __init__(self, context, config):
         super(SNSEventSource, self).__init__(context, config)
-        self._sns = kappa.awsclient.create_client('sns', context.session)
+        self._sns = kappa.awsclient.create_client("sns", context.session)
 
     def _make_notification_id(self, function_name):
-        return 'Kappa-%s-notification' % function_name
+        return "Kappa-%s-notification" % function_name
 
     def exists(self, function):
         try:
-            response = self._sns.call(
-                'list_subscriptions_by_topic',
-                TopicArn=self.arn)
+            response = self._sns.call("list_subscriptions_by_topic", TopicArn=self.arn)
             LOG.debug(response)
-            for subscription in response['Subscriptions']:
-                if subscription['Endpoint'] == function.arn:
+            for subscription in response["Subscriptions"]:
+                if subscription["Endpoint"] == function.arn:
                     return subscription
             return None
         except Exception:
-            LOG.exception('Unable to find event source %s', self.arn)
+            LOG.exception("Unable to find event source %s", self.arn)
 
     def add(self, function):
         try:
-            response = self._sns.call(
-                'subscribe',
-                TopicArn=self.arn, Protocol='lambda',
-                Endpoint=function.arn)
+            response = self._sns.call("subscribe", TopicArn=self.arn, Protocol="lambda", Endpoint=function.arn)
             LOG.debug(response)
         except Exception:
-            LOG.exception('Unable to add SNS event source')
+            LOG.exception("Unable to add SNS event source")
 
     enable = add
 
@@ -58,22 +54,20 @@ class SNSEventSource(kappa.event_source.base.EventSource):
         self.add(function)
 
     def remove(self, function):
-        LOG.debug('removing SNS event source')
+        LOG.debug("removing SNS event source")
         try:
             subscription = self.exists(function)
             if subscription:
-                response = self._sns.call(
-                    'unsubscribe',
-                    SubscriptionArn=subscription['SubscriptionArn'])
+                response = self._sns.call("unsubscribe", SubscriptionArn=subscription["SubscriptionArn"])
                 LOG.debug(response)
         except Exception:
-            LOG.exception('Unable to remove event source %s', self.arn)
+            LOG.exception("Unable to remove event source %s", self.arn)
 
     disable = remove
 
     def status(self, function):
-        LOG.debug('status for SNS notification for %s', function.name)
+        LOG.debug("status for SNS notification for %s", function.name)
         status = self.exists(function)
         if status:
-            status['EventSourceArn'] = status['TopicArn']
+            status["EventSourceArn"] = status["TopicArn"]
         return status

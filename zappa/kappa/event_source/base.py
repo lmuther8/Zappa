@@ -22,16 +22,16 @@ class EventSource(object):
 
     @property
     def arn(self):
-        return self._config['arn']
+        return self._config["arn"]
 
     @property
     def starting_position(self):
-        return self._config.get('starting_position', 'LATEST')
+        return self._config.get("starting_position", "LATEST")
 
     @property
     def batch_size(self):
-        return self._config.get('batch_size', 100)
+        return self._config.get("batch_size", 100)
 
     @property
     def enabled(self):
-        return self._config.get('enabled', False)
+        return self._config.get("enabled", False)

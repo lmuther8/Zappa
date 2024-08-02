@@ -15,9 +15,8 @@
 
 import logging
 
-import jmespath
 import boto3
-
+import jmespath
 
 LOG = logging.getLogger(__name__)
 
@@ -91,10 +90,9 @@ class AWSClient(object):
 
 def create_session(profile_name, region_name):
     global _session_cache
-    session_key = '{}:{}'.format(profile_name, region_name)
+    session_key = "{}:{}".format(profile_name, region_name)
     if session_key not in _session_cache:
-        session = boto3.session.Session(
-            region_name=region_name, profile_name=profile_name)
+        session = boto3.session.Session(region_name=region_name, profile_name=profile_name)
         _session_cache[session_key] = session
     return _session_cache[session_key]
 
